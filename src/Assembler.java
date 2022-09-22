@@ -56,7 +56,6 @@ public class Assembler {
     
     Assembler(String assembly){
         tok = new Tokenizer(assembly);
-
     }
 
     private void loadLine(){
@@ -75,6 +74,18 @@ public class Assembler {
     private boolean isNumeric(String token){
         return NUMERIC_PATTERN.matcher(token).matches();
     }
+    private int toNumeric(String token){
+        return Integer.parseInt(token);
+    }
+    private String toBinaryString(int number){
+        String bin = "";
+        while(number != 0){
+            bin = bin + number%2;
+            number /= 2;
+        }
+
+        return bin;
+    }
 
     private boolean isLineBreak(String token){
         return token == "\n";
@@ -82,6 +93,10 @@ public class Assembler {
 
     private boolean isInstruction(String token){
         return TYPE_MAP.containsKey(token);
+    }
+
+    private boolean isLabel(String token){
+        return labelMap.containsKey(token);
     }
 
     private boolean isValidLabel(String token){
@@ -106,10 +121,11 @@ public class Assembler {
             if(!isInstruction(lineData.get(0))){
                 if(isValidLabel(lineData.get(0))){
                     labelMap.put(lineData.get(0), currentLine);
+                }else{
+                    System.exit(1);
                 }
             }
             currentLine++;
-            machineCode = MC_STARTER;
             loadLine();
         }
         //////////
@@ -118,7 +134,69 @@ public class Assembler {
         currentLine = 0;
 
         // Iterate again to translate into machine code
-        
+        loadLine();
+        int instIndex = 0;
+        while(!lineData.isEmpty()){
+
+            if(!isInstruction(lineData.get(instIndex))){
+                if(!isValidLabel(lineData.get(instIndex))){
+                    exit(1);
+                }else{
+                    instIndex++;
+                    if(!isInstruction(lineData.get(instIndex))){
+                        exit(1);
+                    }
+                }
+            }
+            String inst = lineData.get(instIndex);
+            String opcode = OPCODE_MAP.get(inst);
+            String type = TYPE_MAP.get(inst);
+            int fieldCount = FIELD_COUNT_MAP.get(inst);
+            String[] fields = {"", "", ""};
+
+            machineCode = MC_STARTER;
+            machineCode += opcode;
+            
+            for(int j = 0 ; j < fieldCount; ++j){
+                fields[j]= lineData.get(instIndex+1+j);
+                if(!isNumeric(fields[j])){
+                    exit(1);
+                }else{
+                    fields[j] = toBinaryString(toNumeric(fields[j]));
+                }
+            }
+
+            if(type == "R"){
+                machineCode += fields[0];
+                machineCode += fields[1];
+                machineCode += "0000000000000";
+                machineCode += fields[2];
+            }else if(type == "I"){
+                // check offsetField in [-32768,32767] & turn into 16 bit 2's compliment 
+                // fields[2]
+
+                machineCode += fields[0];
+                machineCode += fields[1];
+                machineCode += fields[2];
+            }else if(type == "J"){
+                // check offsetField in [-32768,32767] & turn into 16 bit 2's compliment 
+                // fields[2]
+
+                machineCode += fields[0];
+                machineCode += fields[1];
+                machineCode += "0000000000000000";
+            }else if(type == "O"){
+                machineCode += "0000000000000000000000";
+            }
+
+            currentLine++;
+            machineCode = MC_STARTER;
+            loadLine();
+        }
+    }
+
+    public void exit(int exitCode){
+        System.exit(exitCode);
     }
 
     public void printAssemblyWithCurrentLine(){
