@@ -2,7 +2,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-public class AssemblyReader {
+public class AssemblyFileReader {
 
     /**
      * reads an assembly file and turns it into a long String

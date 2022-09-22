@@ -96,7 +96,7 @@ public class Assembler {
         
         String fileName = "test01.s";
 
-        String data = AssemblyReader.readFileToString(dir + fileName);
+        String data = AssemblyFileReader.readFileToString(dir + fileName);
         if (DEBUG)
             System.out.println(data);
 
