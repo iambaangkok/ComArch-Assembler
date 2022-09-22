@@ -1,18 +1,47 @@
-## Getting Started
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+# Work load arrangement
+In format of class - person
+- Tokenizer - Game
+- Assembler - BK
+- AssemblyReader - BK
 
-## Folder Structure
+# Specification
+## Input specification
+- assembly code
+- แต่ละคำสั่งอยู่ในบรรทัดของตัวเอง
+- `label instruction field0 field1 field2 comments`
+    - label: มากสุด 6 ตัวอักษร
+    - label: character + number
+    - label: ต้องขึ้นต้นด้วยตัวอักษร
+    - label: ไม่มีก็ได้
+    - field: decimal (เลขฐาน 10) หรือ label
+    - R-type: regA, regB, destReg
+    - I-type: regA, regB, offsetField
+        - symbolic address: คำนวณ offsetField ให้เท่ากับ address ของ label
+        - zero-base register ในการอ้างถึง label
+        - non zero-base register ในการชี้ไปที่ array
+    - J-type: regA, regB
+    - O-type: ไม่มี field
+    - .fill: field 1 ตัว
+        - number → เก็บเลขไว้ใน instruction address นั้น
+        - label → เก็บ address ของ label นั้น
+    - comments: มี end of line ’\n’
+  
+## Program specification
+- errors ที่ควร detect ได้
+    - undefined labels
+    - duplicate labels
+    - offsetField ที่เกิน 16 bits
+    - unrecognized opcode
+    - exit(1) → error
+    - exit(0) → no error
+    - ไม่ต้อง detect error ของ simulator
+- offsetField เป็น 2’s compliment: [-32768, 32767]
+    - ถ้าเป็น int 32 อย่าลืมเอาแค่ 16 bits negative value
 
-The workspace contains two folders by default, where:
+## Output specification
+- output as decimal → machine code file
+- แต่ละบรรทัดเป็น 1 instruction memory
+- * display มี address, hex บอก
+- * output มีแค่ decimal
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
-
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
-
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
-
-## Dependency Management
-
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
