@@ -11,7 +11,7 @@ public class Tokenizer {
 
 
     Tokenizer(String assembly){
-        st = new StringTokenizer(assembly);
+        st = new StringTokenizer(assembly," ");
     }
 
     public boolean hasNext(){
