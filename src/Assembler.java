@@ -177,7 +177,21 @@ public class Assembler {
 
                 machineCode += fields[0];
                 machineCode += fields[1];
-                machineCode += fields[2];
+                if(Integer.parseInt(fields[2]) > 32767 ||Integer.parseInt(fields[2]) < -32768){
+                    exit(1);
+                }else{
+                    int dec = Integer.parseInt(fields[2]);
+                    if(Integer.parseInt(fields[2]) >= 0){
+                        
+        
+                    }else {
+                        dec = -dec;
+                        // 2's complement
+                    }
+                    String bi = toBinaryString(dec);
+                    if(bi.length() != 16){
+                    }
+                }
             }else if(type == "J"){
                 // check offsetField in [-32768,32767] & turn into 16 bit 2's compliment 
                 // fields[2]
@@ -201,5 +215,35 @@ public class Assembler {
 
     public void printAssemblyWithCurrentLine(){
         System.out.println("line[" + currentLine + "] ");
+    }
+
+    public String twosCompliment(String bin) {
+        String twos = "", ones = "";
+
+        for (int i = 0; i < bin.length(); i++) {
+            ones += flip(bin.charAt(i));
+        }
+        int number0 = Integer.parseInt(ones, 2);
+        StringBuilder builder = new StringBuilder(ones);
+        boolean b = false;
+        for (int i = ones.length() - 1; i > 0; i--) {
+            if (ones.charAt(i) == '1') {
+                builder.setCharAt(i, '0');
+            } else {
+                builder.setCharAt(i, '1');
+                b = true;
+                break;
+            }
+        }
+        if (!b)
+            builder.append("1", 0, 7);
+
+        twos = builder.toString();
+
+        return twos;
+    }
+
+    public char flip(char c) {
+        return (c == '0') ? '1' : '0';
     }
 }
