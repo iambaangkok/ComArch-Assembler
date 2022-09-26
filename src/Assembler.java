@@ -181,16 +181,25 @@ public class Assembler {
                     exit(1);
                 }else{
                     int dec = Integer.parseInt(fields[2]);
+                    String bin;
                     if(Integer.parseInt(fields[2]) >= 0){
-                        
+                        bin = toBinaryString(dec);
         
                     }else {
                         dec = -dec;
+                        bin = toBinaryString(dec);
                         // 2's complement
+                        twosCompliment(bin);
                     }
-                    String bi = toBinaryString(dec);
-                    if(bi.length() != 16){
+                    //assign bin to 16-bit
+                    if(bin.length() != 16){
+                        StringBuilder builder = new StringBuilder();
+                        for(int i = 0;i < 16-bin.length();i++){
+                            builder.append(0);
+                        }
+                        bin = builder+bin;
                     }
+                    machineCode += bin;
                 }
             }else if(type == "J"){
                 // check offsetField in [-32768,32767] & turn into 16 bit 2's compliment 
@@ -223,7 +232,7 @@ public class Assembler {
         for (int i = 0; i < bin.length(); i++) {
             ones += flip(bin.charAt(i));
         }
-        int number0 = Integer.parseInt(ones, 2);
+        // int number0 = Integer.parseInt(ones, 2);
         StringBuilder builder = new StringBuilder(ones);
         boolean b = false;
         for (int i = ones.length() - 1; i > 0; i--) {
@@ -244,6 +253,11 @@ public class Assembler {
     }
 
     public char flip(char c) {
-        return (c == '0') ? '1' : '0';
+        if(c == '0'){
+            return '1';
+        }else{
+            return '0';
+        }
+        
     }
 }
