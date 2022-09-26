@@ -197,7 +197,7 @@ public class Assembler {
                         for(int i = 0;i < 16-bin.length();i++){
                             builder.append(0);
                         }
-                        bin = builder+bin;
+                        bin = builder.toString()+bin;
                     }
                     machineCode += bin;
                 }
