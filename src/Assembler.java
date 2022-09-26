@@ -184,12 +184,12 @@ public class Assembler {
                     String bin;
                     if(Integer.parseInt(fields[2]) >= 0){
                         bin = toBinaryString(dec);
-                        bin = assignTo16Bit(bin);
+                        bin = addTo16Bit(bin);
         
                     }else {
                         dec = -dec;
                         bin = toBinaryString(dec);
-                        bin = assignTo16Bit(bin);
+                        bin = addTo16Bit(bin);
                         twosCompliment(bin);
                     }
                     
@@ -240,7 +240,7 @@ public class Assembler {
         return twos;
     }
 
-    public String assignTo16Bit(String bin){
+    public String addTo16Bit(String bin){
         if(bin.length() != 16){
             StringBuilder builder = new StringBuilder();
             for(int i = 0;i < 16-bin.length();i++){
