@@ -233,21 +233,17 @@ public class Assembler {
             ones += flip(bin.charAt(i));
         }
         StringBuilder builder = new StringBuilder(ones);
-        boolean b = false;
+        
         for (int i = ones.length() - 1; i > 0; i--) {
             if (ones.charAt(i) == '1') {
                 builder.setCharAt(i, '0');
             } else {
                 builder.setCharAt(i, '1');
-                b = true;
+                
                 break;
             }
         }
-        if (!b)
-            builder.append("1", 0, 7);
-
         twos = builder.toString();
-
         return twos;
     }
 
@@ -257,6 +253,5 @@ public class Assembler {
         }else{
             return '0';
         }
-        
     }
 }
