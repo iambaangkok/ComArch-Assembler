@@ -184,21 +184,15 @@ public class Assembler {
                     String bin;
                     if(Integer.parseInt(fields[2]) >= 0){
                         bin = toBinaryString(dec);
+                        bin = assignTo16Bit(bin);
         
                     }else {
                         dec = -dec;
                         bin = toBinaryString(dec);
-                        // 2's complement
+                        bin = assignTo16Bit(bin);
                         twosCompliment(bin);
                     }
-                    //assign bin to 16-bit
-                    if(bin.length() != 16){
-                        StringBuilder builder = new StringBuilder();
-                        for(int i = 0;i < 16-bin.length();i++){
-                            builder.append(0);
-                        }
-                        bin = builder.toString()+bin;
-                    }
+                    
                     machineCode += bin;
                 }
             }else if(type == "J"){
@@ -239,12 +233,22 @@ public class Assembler {
                 builder.setCharAt(i, '0');
             } else {
                 builder.setCharAt(i, '1');
-                
                 break;
             }
         }
         twos = builder.toString();
         return twos;
+    }
+
+    public String assignTo16Bit(String bin){
+        if(bin.length() != 16){
+            StringBuilder builder = new StringBuilder();
+            for(int i = 0;i < 16-bin.length();i++){
+                builder.append(0);
+            }
+            bin = builder.toString()+bin;
+        }
+        return bin;
     }
 
     public char flip(char c) {
