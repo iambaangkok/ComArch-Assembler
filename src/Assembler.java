@@ -178,7 +178,24 @@ public class Assembler {
 
                 machineCode += fields[0];
                 machineCode += fields[1];
-                machineCode += fields[2]; 
+                if(Integer.parseInt(fields[2]) > 32767 ||Integer.parseInt(fields[2]) < -32768){
+                    exit(1);
+                }else{
+                    int dec = Integer.parseInt(fields[2]);
+                    String bin;
+                    if(Integer.parseInt(fields[2]) >= 0){
+                        bin = toBinaryString(dec);
+                        bin = addTo16Bit(bin);
+        
+                    }else {
+                        dec = -dec;
+                        bin = toBinaryString(dec);
+                        bin = addTo16Bit(bin);
+                        twosCompliment(bin);
+                    }
+                    
+                    machineCode += bin;
+                }
             }else if(type == "J"){
                 machineCode += fields[0];
                 machineCode += fields[1];
@@ -200,5 +217,44 @@ public class Assembler {
 
     public void printAssemblyWithCurrentLine(){
         System.out.println("line[" + currentLine + "] ");
+    }
+
+    public String twosCompliment(String bin) {
+        String twos = "", ones = "";
+
+        for (int i = 0; i < bin.length(); i++) {
+            ones += flip(bin.charAt(i));
+        }
+        StringBuilder builder = new StringBuilder(ones);
+        
+        for (int i = ones.length() - 1; i > 0; i--) {
+            if (ones.charAt(i) == '1') {
+                builder.setCharAt(i, '0');
+            } else {
+                builder.setCharAt(i, '1');
+                break;
+            }
+        }
+        twos = builder.toString();
+        return twos;
+    }
+
+    public String addTo16Bit(String bin){
+        if(bin.length() != 16){
+            StringBuilder builder = new StringBuilder();
+            for(int i = 0;i < 16-bin.length();i++){
+                builder.append(0);
+            }
+            bin = builder.toString()+bin;
+        }
+        return bin;
+    }
+
+    public char flip(char c) {
+        if(c == '0'){
+            return '1';
+        }else{
+            return '0';
+        }
     }
 }
