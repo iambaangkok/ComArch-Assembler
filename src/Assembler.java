@@ -120,7 +120,7 @@ public class Assembler {
                 if(isValidLabel(lineData.get(0))){
                     labelMap.put(lineData.get(0), currentLine);
                 }else{
-                    System.exit(1);
+                    exit(1);
                 }
             }
             currentLine++;
@@ -235,6 +235,7 @@ public class Assembler {
     }
 
     public void exit(int exitCode){
+        System.out.println("Exit with status " + exitCode);
         System.exit(exitCode);
     }
 

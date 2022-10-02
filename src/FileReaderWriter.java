@@ -36,6 +36,7 @@ public class FileReaderWriter {
      */
     public static void writeStringToFile(String path, List<String> strings) {
         try {
+            System.out.println("Writing to " + path + " .....");
             File file = new File(path);
             if (file.createNewFile()) {
                 System.out.println("File created: " + file.getName());
