@@ -8,8 +8,6 @@ public class Assembler {
 
     private boolean DEBUG = true;
 
-    private String dir = "src/assemblyFiles/";
-
     private final Map<String, String> TYPE_MAP = Map.of(
         "add", "R",
         "nand", "R",
@@ -110,17 +108,14 @@ public class Assembler {
         );
     }
 
-    public void assembleIntoMachineCode(){
-        
-        String fileName = "test01.s";
-
-        String data = AssemblyFileReader.readFileToString(dir + fileName);
-        if (DEBUG)
-            System.out.println(data);
-
+    public List<String> assembleIntoMachineCode(){
         // Iterate once to fill labelMap
         loadLine();
         while(!lineData.isEmpty()){
+            if(DEBUG){
+                System.out.println("Filling labelMap, lineData: " + lineData);
+            }
+
             if(!isInstruction(lineData.get(0))){
                 if(isValidLabel(lineData.get(0))){
                     labelMap.put(lineData.get(0), currentLine);
@@ -212,6 +207,8 @@ public class Assembler {
             currentLine++;
             loadLine();
         }
+
+        return new ArrayList<String>(machineCodes);
     }
 
     public void exit(int exitCode){
