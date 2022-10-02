@@ -176,19 +176,27 @@ public class Assembler {
 
                 machineCode += fields[0];
                 machineCode += fields[1];
-                if(Integer.parseInt(fields[2]) > 32767 ||Integer.parseInt(fields[2]) < -32768){
+                int offsetField = 0;
+                if(isNumeric(fields[2])){
+                    offsetField = toNumeric(fields[2]);
+                    
+                }else if(isLabel(fields[2])){
+                    offsetField = labelMap.get(fields[2]);
+                }else{
+                    exit(1);
+                }
+                if(offsetField> 32767 ||offsetField < -32768){
                     exit(1);
                 }else{
-                    int dec = Integer.parseInt(fields[2]);
                     String bin;
-                    if(Integer.parseInt(fields[2]) >= 0){
-                        bin = toBinaryString(dec);
-                        bin = addTo16Bit(bin);
+                    if(offsetField >= 0){
+                        bin = toBinaryString(offsetField);
+                        bin = fillBits("0",bin, 16);
         
                     }else {
-                        dec = -dec;
-                        bin = toBinaryString(dec);
-                        bin = addTo16Bit(bin);
+                        offsetField = -offsetField;
+                        bin = toBinaryString(offsetField);
+                        bin = fillBits("0",bin, 16);
                         twosCompliment(bin);
                     }
                     
@@ -265,16 +273,16 @@ public class Assembler {
         return twos;
     }
 
-    public String addTo16Bit(String bin){
-        if(bin.length() != 16){
-            StringBuilder builder = new StringBuilder();
-            for(int i = 0;i < 16-bin.length();i++){
-                builder.append(0);
-            }
-            bin = builder.toString()+bin;
-        }
-        return bin;
-    }
+    // public String addTo16Bit(String bin){
+    //     if(bin.length() != 16){
+    //         StringBuilder builder = new StringBuilder();
+    //         for(int i = 0;i < 16-bin.length();i++){
+    //             builder.append(0);
+    //         }
+    //         bin = builder.toString()+bin;
+    //     }
+    //     return bin;
+    // }
 
     public char flip(char c) {
         if(c == '0'){
