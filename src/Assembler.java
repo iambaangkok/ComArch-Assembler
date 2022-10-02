@@ -219,6 +219,7 @@ public class Assembler {
                     String bin;
                     if (offsetField >= 0) {
                         bin = toBinaryString(offsetField);
+                        System.out.println("bin: "+bin);
                         bin = fillBits("0", bin, 16);
 
                     } else {
@@ -244,9 +245,17 @@ public class Assembler {
                 System.out.println("instIndex: " + instIndex + " field: " + field);
                 if (isNumeric(field)) {
                     int dec = toNumeric(field);
-                    String bin = toBinaryString(dec);
-                    machineCode = bin;
-                    machineCode = fillBits("0", machineCode, 32);
+                    String bin;
+                    if(dec < 0){
+                        dec = -dec;
+                        bin = toBinaryString(dec);
+                        bin = fillBits("0", bin, 32);
+                        machineCode = twosCompliment(bin);
+                    }else{
+                        bin = toBinaryString(dec);
+                        machineCode = bin;
+                        machineCode = fillBits("0", machineCode, 32);
+                    }
                 } else if (isLabel(field)) {
                     int dec = labelMap.get(field);
                     String bin = toBinaryString(dec);
@@ -306,17 +315,6 @@ public class Assembler {
         twos = builder.toString();
         return twos;
     }
-
-    // public String addTo16Bit(String bin){
-    // if(bin.length() != 16){
-    // StringBuilder builder = new StringBuilder();
-    // for(int i = 0;i < 16-bin.length();i++){
-    // builder.append(0);
-    // }
-    // bin = builder.toString()+bin;
-    // }
-    // return bin;
-    // }
 
     public char flip(char c) {
         if (c == '0') {
