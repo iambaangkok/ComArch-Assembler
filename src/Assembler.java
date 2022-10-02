@@ -18,7 +18,8 @@ public class Assembler {
         "beq", "I",
         "jarl", "J",
         "halt", "O",
-        "noop", "O"
+        "noop", "O",
+        ".fill", "F"
     );
     private final Map<String, String> OPCODE_MAP = Map.of(
         "add", "000",
@@ -28,7 +29,8 @@ public class Assembler {
         "beq", "100",
         "jarl", "101",
         "halt", "110",
-        "noop", "111"
+        "noop", "111",
+        ".fill", "FIL"
     );
     private final Map<String, Integer> NUMERIC_FIELD_COUNT_MAP = Map.of(
         "add", 3,
@@ -38,7 +40,8 @@ public class Assembler {
         "beq", 2,
         "jarl", 2,
         "halt", 0,
-        "noop", 0
+        "noop", 0,
+        ".fill", 0
     );
     private final String MC_STARTER = "0000000";        // bits[31-25] (7 bits) should always be 0 
     
