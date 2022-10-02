@@ -18,7 +18,7 @@ public class FileReaderWriter {
             File file = new File(path);
             Scanner sc = new Scanner(file);
             while (sc.hasNextLine()) {
-                data += sc.nextLine() + '\n';
+                data += sc.nextLine() + " \n";
             }
             sc.close();
         } catch (FileNotFoundException e) {
