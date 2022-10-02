@@ -1,5 +1,7 @@
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
@@ -18,7 +20,7 @@ public class FileReaderWriter {
             File file = new File(path);
             Scanner sc = new Scanner(file);
             while (sc.hasNextLine()) {
-                data += sc.nextLine() + " \n";
+                data += sc.nextLine() + " \n ";
             }
             sc.close();
         } catch (FileNotFoundException e) {
@@ -37,16 +39,18 @@ public class FileReaderWriter {
     public static void writeStringToFile(String path, List<String> strings) {
         try {
             System.out.println("Writing to " + path + " .....");
-            File file = new File(path);
-            if (file.createNewFile()) {
-                System.out.println("File created: " + file.getName());
-            } else {
-                System.out.println("File already exists.");
+            BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+            for (String str : strings) {
+                writer.write(str);
+                writer.write("\n");
             }
+            writer.close();
+            System.out.println("Finished writing.");
         } catch (IOException e) {
             System.out.println("An error occurred.");
             System.out.println("path: " + path);
             e.printStackTrace();
         }
+        
     }
 }
