@@ -200,6 +200,21 @@ public class Assembler {
                 machineCode += "0000000000000000";
             }else if(type == "O"){
                 machineCode += "0000000000000000000000";
+            }else if(inst == ".fill"){
+                String field = lineData.get(instIndex+1);
+                if(isNumeric(field)){
+                    int dec = toNumeric(field);
+                    String bin = toBinaryString(dec);
+                    machineCode = bin;
+                    machineCode = fillBits("0",machineCode, 32);
+                }else if(isLabel(field)){
+                    int dec = labelMap.get(field);
+                    String bin = toBinaryString(dec);
+                    machineCode = bin;
+                    machineCode = fillBits("0",machineCode, 32);
+                }else{
+                    exit(1);
+                }
             }
 
             machineCodes.add(machineCode);
@@ -217,6 +232,17 @@ public class Assembler {
 
     public void printAssemblyWithCurrentLine(){
         System.out.println("line[" + currentLine + "] ");
+    }
+
+    private String fillBits(String filler, String base, int length){
+        StringBuilder sb = new StringBuilder("");
+
+        while(base.length() + sb.length() < length){
+            sb = sb.append(filler);
+        }
+        sb = sb.append(base);
+
+        return sb.toString();
     }
 
     public String twosCompliment(String bin) {
