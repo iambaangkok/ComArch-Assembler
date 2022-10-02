@@ -3,6 +3,7 @@ import java.util.StringTokenizer;
 
 public class Tokenizer {
     StringTokenizer st;
+    StringTokenizer re;
     /**
      * Tokenizer takes input as an assembly String and 
      * provides methods of iterating through the List<String> containing each token
@@ -12,6 +13,7 @@ public class Tokenizer {
 
     Tokenizer(String assembly){
         st = new StringTokenizer(assembly," ");
+        re = new StringTokenizer(assembly," ");
     }
 
     public boolean hasNext(){
@@ -26,7 +28,8 @@ public class Tokenizer {
      * resets the iterator to the first token
      */
     public void resetIterator(){
-        
+       st = re;
+       
     }
 
 }
