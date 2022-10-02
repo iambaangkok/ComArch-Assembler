@@ -30,12 +30,12 @@ public class Assembler {
         "halt", "110",
         "noop", "111"
     );
-    private final Map<String, Integer> FIELD_COUNT_MAP = Map.of(
+    private final Map<String, Integer> NUMERIC_FIELD_COUNT_MAP = Map.of(
         "add", 3,
         "nand", 3,
-        "lw", 3,
-        "sw", 3,
-        "beq", 3,
+        "lw", 2,
+        "sw", 2,
+        "beq", 2,
         "jarl", 2,
         "halt", 0,
         "noop", 0
@@ -151,7 +151,7 @@ public class Assembler {
             String inst = lineData.get(instIndex);
             String opcode = OPCODE_MAP.get(inst);
             String type = TYPE_MAP.get(inst);
-            int fieldCount = FIELD_COUNT_MAP.get(inst);
+            int fieldCount = NUMERIC_FIELD_COUNT_MAP.get(inst);
             String[] fields = {"", "", ""};
 
             machineCode = MC_STARTER;
@@ -174,14 +174,12 @@ public class Assembler {
             }else if(type == "I"){
                 // check offsetField in [-32768,32767] & turn into 16 bit 2's compliment 
                 // fields[2]
+                // check for symbolic address
 
                 machineCode += fields[0];
                 machineCode += fields[1];
-                machineCode += fields[2];
+                machineCode += fields[2]; 
             }else if(type == "J"){
-                // check offsetField in [-32768,32767] & turn into 16 bit 2's compliment 
-                // fields[2]
-
                 machineCode += fields[0];
                 machineCode += fields[1];
                 machineCode += "0000000000000000";
@@ -189,8 +187,9 @@ public class Assembler {
                 machineCode += "0000000000000000000000";
             }
 
+            machineCodes.add(machineCode);
+
             currentLine++;
-            machineCode = MC_STARTER;
             loadLine();
         }
     }
