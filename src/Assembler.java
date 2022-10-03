@@ -62,10 +62,8 @@ public class Assembler {
             String token = tok.next();
             System.out.print(token);
             if (isLineBreak(token)) {
-                System.out.println(" Yes");
                 break;
             }
-            System.out.println(" No");
 
             lineData.add(token);
         }
@@ -79,14 +77,26 @@ public class Assembler {
         return Integer.parseInt(token);
     }
 
-    private String toBinaryString(int number) {
-        String bin = "";
-        while (number != 0) {
-            bin = bin + number % 2;
+    public String toBinaryString(int number) {
+        if(DEBUG) System.out.print("toBinaryString(" + number + "): ");
+
+        StringBuilder bin = new StringBuilder("");
+
+        if(number == 0 || number == 1){
+            bin.append(number);
+            return bin.toString();
+        }
+
+        while (number > 0) {
+            bin.append(number % 2);
             number /= 2;
         }
 
-        return bin;
+        bin.reverse();
+
+        if(DEBUG) System.out.println(bin);
+
+        return bin.toString();
     }
 
     private boolean isLineBreak(String token) {

@@ -22,6 +22,7 @@ public class FileReaderWriter {
             while (sc.hasNextLine()) {
                 data += sc.nextLine() + " \n ";
             }
+            data += " \n ";
             sc.close();
         } catch (FileNotFoundException e) {
             System.out.println("File not found.");
