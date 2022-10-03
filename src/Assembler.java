@@ -216,12 +216,21 @@ public class Assembler {
                     offsetField = toNumeric(fields[2]);
                     if(DEBUG) System.out.println("field[2] isNumeric = " + offsetField);
                 } else if (isLabel(fields[2])) {
-                    offsetField = labelMap.get(fields[2]);
+                    if(currentLine > labelMap.get(fields[2])){
+                        offsetField = -labelMap.get(fields[2]);
+                        if(inst.equals("beq")){
+                            // Addr = PC+1+offsetField
+                            offsetField = offsetField-1;
+                        }
+                    }else{
+                        offsetField = labelMap.get(fields[2]);
+                    }
                     if(DEBUG) System.out.println("field[2] isLabel = " + offsetField);
                 } else {
                     if(DEBUG) System.out.println("D");
                     exit(1);
                 }
+
                 if (offsetField > 32767 || offsetField < -32768) {
                     if(DEBUG) System.out.println("E");
                     exit(1);
@@ -236,7 +245,7 @@ public class Assembler {
                         offsetField = -offsetField;
                         bin = toBinaryString(offsetField);
                         bin = fillBits("0", bin, 16);
-                        twosCompliment(bin);
+                        bin = twosCompliment(bin);
                     }
 
                     machineCode += bin;
