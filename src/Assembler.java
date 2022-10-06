@@ -6,41 +6,41 @@ import java.util.regex.Pattern;
 
 public class Assembler {
 
-    private boolean DEBUG = true;
+    private static boolean DEBUG = true;
 
-    private final Map<String, String> TYPE_MAP = Map.of(
+    private static final Map<String, String> TYPE_MAP = Map.of(
             "add", "R",
             "nand", "R",
             "lw", "I",
             "sw", "I",
             "beq", "I",
-            "jarl", "J",
+            "jalr", "J",
             "halt", "O",
             "noop", "O",
             ".fill", "F");
-    private final Map<String, String> OPCODE_MAP = Map.of(
+    private static final Map<String, String> OPCODE_MAP = Map.of(
             "add", "000",
             "nand", "001",
             "lw", "010",
             "sw", "011",
             "beq", "100",
-            "jarl", "101",
+            "jalr", "101",
             "halt", "110",
             "noop", "111",
             ".fill", "FIL");
-    private final Map<String, Integer> NUMERIC_FIELD_COUNT_MAP = Map.of(
+    private static final Map<String, Integer> NUMERIC_FIELD_COUNT_MAP = Map.of(
             "add", 3,
             "nand", 3,
             "lw", 2,
             "sw", 2,
             "beq", 2,
-            "jarl", 2,
+            "jalr", 2,
             "halt", 0,
             "noop", 0,
             ".fill", 0);
-    private final String MC_STARTER = "0000000"; // bits[31-25] (7 bits) should always be 0
+    private static final String MC_STARTER = "0000000"; // bits[31-25] (7 bits) should always be 0
 
-    private final Pattern NUMERIC_PATTERN = Pattern.compile("-?\\d+(\\.\\d+)?");
+    private static final Pattern NUMERIC_PATTERN = Pattern.compile("-?\\d+(\\.\\d+)?");
 
     private Tokenizer tok;
 
@@ -69,15 +69,15 @@ public class Assembler {
         }
     }
 
-    private boolean isNumeric(String token) {
+    private static boolean isNumeric(String token) {
         return NUMERIC_PATTERN.matcher(token).matches();
     }
 
-    private int toNumeric(String token) {
+    private static int toNumeric(String token) {
         return Integer.parseInt(token);
     }
 
-    public String toBinaryString(int dec) {
+    public static String toBinaryString(int dec) {
         if(DEBUG) System.out.print("toBinaryString(" + dec + "): ");
 
         StringBuilder bin = new StringBuilder("");
@@ -99,7 +99,7 @@ public class Assembler {
         return bin.toString();
     }
 
-    public int toDecimal(String bin){
+    public static int toDecimal(String bin){
         if(DEBUG) System.out.print("toDecimal(" + bin + "): ");
 
         int dec = 0;
@@ -125,11 +125,11 @@ public class Assembler {
         return dec;
     }
 
-    private boolean isLineBreak(String token) {
+    private static boolean isLineBreak(String token) {
         return token.equals("\n");
     }
 
-    private boolean isInstruction(String token) {
+    private static boolean isInstruction(String token) {
         return TYPE_MAP.containsKey(token);
     }
 
@@ -339,7 +339,7 @@ public class Assembler {
         System.out.println("line[" + currentLine + "] ");
     }
 
-    private String fillBits(String filler, String base, int length) {
+    private static String fillBits(String filler, String base, int length) {
         StringBuilder sb = new StringBuilder("");
 
         while (base.length() + sb.length() < length) {
@@ -350,7 +350,7 @@ public class Assembler {
         return sb.toString();
     }
 
-    public String twosCompliment(String bin) {
+    public static String twosCompliment(String bin) {
         String twos = "", ones = "";
 
         for (int i = 0; i < bin.length(); i++) {
@@ -370,7 +370,7 @@ public class Assembler {
         return twos;
     }
 
-    public char flip(char c) {
+    public static char flip(char c) {
         if (c == '0') {
             return '1';
         } else {
