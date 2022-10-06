@@ -11,9 +11,10 @@ public class Main {
         
         Assembler as = new Assembler(FileReaderWriter.readFileToString(srcDir+srcFileName));
 
-        List<String> machineCodes = as.assembleIntoMachineCode();
+        as.assembleIntoMachineCode();
+        List<String> decimalMachineCodes = as.getDecimalMachineCodes();
 
-        FileReaderWriter.writeStringToFile(outputDir + outputFileName, machineCodes);
+        FileReaderWriter.writeStringToFile(outputDir + outputFileName, decimalMachineCodes);
 
     }
 }

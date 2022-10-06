@@ -17,5 +17,25 @@ public class AssemblerTest {
         Assert.assertEquals("10000000", as.toBinaryString(128));
 
     }
+
+    @Test
+    public void testToDecimal(){
+        Assembler as = new Assembler("");
+
+        Assert.assertEquals(0, as.toDecimal("0"));
+        Assert.assertEquals(1, as.toDecimal("01"));
+        Assert.assertEquals(2, as.toDecimal("010"));
+        Assert.assertEquals(7, as.toDecimal("0111"));
+        Assert.assertEquals(7, as.toDecimal("0000111"));
+        Assert.assertEquals(64+16+4+1, as.toDecimal("01010101"));
+
+        Assert.assertEquals(-1, as.toDecimal("11"));
+        Assert.assertEquals(-2, as.toDecimal("110"));
+        
+        Assert.assertEquals(-16, as.toDecimal("110000"));
+        Assert.assertEquals(-11, as.toDecimal("110101"));
+
+
+    }
     
 }

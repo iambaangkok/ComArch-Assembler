@@ -77,19 +77,19 @@ public class Assembler {
         return Integer.parseInt(token);
     }
 
-    public String toBinaryString(int number) {
-        if(DEBUG) System.out.print("toBinaryString(" + number + "): ");
+    public String toBinaryString(int dec) {
+        if(DEBUG) System.out.print("toBinaryString(" + dec + "): ");
 
         StringBuilder bin = new StringBuilder("");
 
-        if(number == 0 || number == 1){
-            bin.append(number);
+        if(dec == 0 || dec == 1){
+            bin.append(dec);
             return bin.toString();
         }
 
-        while (number > 0) {
-            bin.append(number % 2);
-            number /= 2;
+        while (dec > 0) {
+            bin.append(dec % 2);
+            dec /= 2;
         }
 
         bin.reverse();
@@ -97,6 +97,32 @@ public class Assembler {
         if(DEBUG) System.out.println(bin);
 
         return bin.toString();
+    }
+
+    public int toDecimal(String bin){
+        if(DEBUG) System.out.print("toDecimal(" + bin + "): ");
+
+        int dec = 0;
+        int power = 0;
+        
+        if(bin.charAt(0) == '0'){
+            for(int i = bin.length()-1; i >=0; i--){
+                dec += toNumeric(bin.charAt(i)+"")*Math.pow(2, power);
+                power++;
+            }
+        }else{
+            bin = twosCompliment(bin);
+            for(int i = bin.length()-1; i >=0; i--){
+                dec += toNumeric(bin.charAt(i)+"")*Math.pow(2, power);
+                power++;
+            }
+            dec = -dec;
+        }
+        
+
+        if(DEBUG) System.out.println(dec);
+
+        return dec;
     }
 
     private boolean isLineBreak(String token) {
@@ -293,6 +319,15 @@ public class Assembler {
         }
 
         return new ArrayList<String>(machineCodes);
+    }
+
+    public List<String> getDecimalMachineCodes(){
+        List<String> dmc = new ArrayList<>();
+        for (String mc : machineCodes) {
+            dmc.add(toDecimal(mc)+"");
+        }
+
+        return dmc;
     }
 
     public void exit(int exitCode) {
