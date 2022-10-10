@@ -242,12 +242,10 @@ public class Assembler {
                     offsetField = toNumeric(fields[2]);
                     if(DEBUG) System.out.println("field[2] isNumeric = " + offsetField);
                 } else if (isLabel(fields[2])) {
-                    if(currentLine > labelMap.get(fields[2])){
-                        offsetField = -labelMap.get(fields[2]);
-                        if(inst.equals("beq")){
-                            // Addr = PC+1+offsetField
-                            offsetField = offsetField-1;
-                        }
+                    if(inst.equals("beq")){
+                        // Addr = PC+1+offsetField
+                        // offsetField = Addr-PC-1
+                        offsetField = labelMap.get(fields[2])-currentLine-1;
                     }else{
                         offsetField = labelMap.get(fields[2]);
                     }

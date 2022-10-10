@@ -7,9 +7,9 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         
-        compile("_multiplication");
-        compile("_combination");
-        compile("test0",1,2);
+        // compile("_multiplication");
+        // compile("_combination");
+        compile("test",1,1);
 
     }
 
