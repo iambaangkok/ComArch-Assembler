@@ -69,20 +69,30 @@ public class Assembler {
         }
     }
 
-    private static boolean isNumeric(String token) {
-        return NUMERIC_PATTERN.matcher(token).matches();
+    public static boolean isInteger(String token) {
+        if(NUMERIC_PATTERN.matcher(token).matches()){
+            double number = Double.parseDouble(token);
+            if(number % 1 != 0){
+                return false;
+            }else{
+                return true;
+            }
+        }else{
+            return false;
+        }
     }
 
-    private static int toNumeric(String token) {
+    public static int toNumeric(String token) {
         return Integer.parseInt(token);
     }
 
     public static String toBinaryString(int dec) {
-        if(DEBUG) System.out.print("toBinaryString(" + dec + "): ");
+        if (DEBUG)
+            System.out.print("toBinaryString(" + dec + "): ");
 
         StringBuilder bin = new StringBuilder("");
 
-        if(dec == 0 || dec == 1){
+        if (dec == 0 || dec == 1) {
             bin.append(dec);
             return bin.toString();
         }
@@ -94,33 +104,35 @@ public class Assembler {
 
         bin.reverse();
 
-        if(DEBUG) System.out.println(bin);
+        if (DEBUG)
+            System.out.println(bin);
 
         return bin.toString();
     }
 
-    public static int toDecimal(String bin){
-        if(DEBUG) System.out.print("toDecimal(" + bin + "): ");
+    public static int toDecimal(String bin) {
+        if (DEBUG)
+            System.out.print("toDecimal(" + bin + "): ");
 
         int dec = 0;
         int power = 0;
-        
-        if(bin.charAt(0) == '0'){
-            for(int i = bin.length()-1; i >=0; i--){
-                dec += toNumeric(bin.charAt(i)+"")*Math.pow(2, power);
+
+        if (bin.charAt(0) == '0') {
+            for (int i = bin.length() - 1; i >= 0; i--) {
+                dec += toNumeric(bin.charAt(i) + "") * Math.pow(2, power);
                 power++;
             }
-        }else{
+        } else {
             bin = twosCompliment(bin);
-            for(int i = bin.length()-1; i >=0; i--){
-                dec += toNumeric(bin.charAt(i)+"")*Math.pow(2, power);
+            for (int i = bin.length() - 1; i >= 0; i--) {
+                dec += toNumeric(bin.charAt(i) + "") * Math.pow(2, power);
                 power++;
             }
             dec = -dec;
         }
-        
 
-        if(DEBUG) System.out.println(dec);
+        if (DEBUG)
+            System.out.println(dec);
 
         return dec;
     }
@@ -141,14 +153,14 @@ public class Assembler {
     private boolean isValidLabel(String token) {
         return !(token.length() > 6
                 || labelMap.containsKey(token)
-                || isNumeric(token.charAt(0) + ""));
+                || isInteger(token.charAt(0) + ""));
     }
 
     public List<String> assembleIntoMachineCode() {
         // Iterate once to fill labelMap
         loadLine();
         while (tok.hasNext()) {
-            if(lineData.isEmpty()){
+            if (lineData.isEmpty()) {
                 loadLine();
                 continue;
             }
@@ -169,7 +181,7 @@ public class Assembler {
         }
         //////////
 
-        if(DEBUG){
+        if (DEBUG) {
             System.out.println(labelMap);
         }
 
@@ -178,10 +190,10 @@ public class Assembler {
 
         // Iterate again to translate into machine code
         loadLine();
-        
+
         while (tok.hasNext()) {
             int instIndex = 0;
-            if(lineData.isEmpty()){
+            if (lineData.isEmpty()) {
                 loadLine();
                 continue;
             }
@@ -192,12 +204,14 @@ public class Assembler {
 
             if (!isInstruction(lineData.get(instIndex))) {
                 if (!isLabel(lineData.get(instIndex))) {
-                    if(DEBUG) System.out.println("A");
+                    if (DEBUG)
+                        System.out.println("A");
                     exit(1);
                 } else {
                     instIndex++;
                     if (!isInstruction(lineData.get(instIndex))) {
-                        if(DEBUG) System.out.println("B");
+                        if (DEBUG)
+                            System.out.println("B");
                         exit(1);
                     }
                 }
@@ -214,8 +228,9 @@ public class Assembler {
             // Convert numeric fields to number
             for (int j = 0; j < fieldCount; ++j) {
                 fields[j] = lineData.get(instIndex + 1 + j);
-                if (!isNumeric(fields[j])) {
-                    if(DEBUG) System.out.println("C");
+                if (!isInteger(fields[j])) {
+                    if (DEBUG)
+                        System.out.println("C");
                     exit(1);
                 } else {
                     fields[j] = toBinaryString(toNumeric(fields[j]));
@@ -235,34 +250,39 @@ public class Assembler {
 
                 machineCode += fields[0];
                 machineCode += fields[1];
-                fields[2] = lineData.get(instIndex+3);
+                fields[2] = lineData.get(instIndex + 3);
                 int offsetField = 0;
-                if(DEBUG) System.out.println("field[2] = " + fields[2]);
-                if (isNumeric(fields[2])) {
+                if (DEBUG)
+                    System.out.println("field[2] = " + fields[2]);
+                if (isInteger(fields[2])) {
                     offsetField = toNumeric(fields[2]);
-                    if(DEBUG) System.out.println("field[2] isNumeric = " + offsetField);
+                    if (DEBUG)
+                        System.out.println("field[2] isInteger = " + offsetField);
                 } else if (isLabel(fields[2])) {
-                    if(inst.equals("beq")){
+                    if (inst.equals("beq")) {
                         // Addr = PC+1+offsetField
                         // offsetField = Addr-PC-1
-                        offsetField = labelMap.get(fields[2])-currentLine-1;
-                    }else{
+                        offsetField = labelMap.get(fields[2]) - currentLine - 1;
+                    } else {
                         offsetField = labelMap.get(fields[2]);
                     }
-                    if(DEBUG) System.out.println("field[2] isLabel = " + offsetField);
+                    if (DEBUG)
+                        System.out.println("field[2] isLabel = " + offsetField);
                 } else {
-                    if(DEBUG) System.out.println("D");
+                    if (DEBUG)
+                        System.out.println("D");
                     exit(1);
                 }
 
                 if (offsetField > 32767 || offsetField < -32768) {
-                    if(DEBUG) System.out.println("E");
+                    if (DEBUG)
+                        System.out.println("E");
                     exit(1);
                 } else {
                     String bin;
                     if (offsetField >= 0) {
                         bin = toBinaryString(offsetField);
-                        System.out.println("bin: "+bin);
+                        System.out.println("bin: " + bin);
                         bin = fillBits("0", bin, 16);
 
                     } else {
@@ -278,23 +298,23 @@ public class Assembler {
                 machineCode += fields[0];
                 machineCode += fields[1];
                 machineCode += "0000000000000000";
-                
+
             } else if (type.equals("O")) {
                 machineCode += "0000000000000000000000";
-                
+
             } else if (inst.equals(".fill")) {
                 machineCode = "";
                 String field = lineData.get(instIndex + 1);
                 System.out.println("instIndex: " + instIndex + " field: " + field);
-                if (isNumeric(field)) {
+                if (isInteger(field)) {
                     int dec = toNumeric(field);
                     String bin;
-                    if(dec < 0){
+                    if (dec < 0) {
                         dec = -dec;
                         bin = toBinaryString(dec);
                         bin = fillBits("0", bin, 32);
                         machineCode = twosCompliment(bin);
-                    }else{
+                    } else {
                         bin = toBinaryString(dec);
                         machineCode = bin;
                         machineCode = fillBits("0", machineCode, 32);
@@ -305,11 +325,13 @@ public class Assembler {
                     machineCode = bin;
                     machineCode = fillBits("0", machineCode, 32);
                 } else {
-                    if(DEBUG) System.out.println("F");
+                    if (DEBUG)
+                        System.out.println("F");
                     exit(1);
                 }
             }
-            if(DEBUG) System.out.println("machineCode: " + machineCode);
+            if (DEBUG)
+                System.out.println("machineCode: " + machineCode);
             machineCodes.add(machineCode);
 
             currentLine++;
@@ -319,10 +341,10 @@ public class Assembler {
         return new ArrayList<String>(machineCodes);
     }
 
-    public List<String> getDecimalMachineCodes(){
+    public List<String> getDecimalMachineCodes() {
         List<String> dmc = new ArrayList<>();
         for (String mc : machineCodes) {
-            dmc.add(toDecimal(mc)+"");
+            dmc.add(toDecimal(mc) + "");
         }
 
         return dmc;
@@ -337,7 +359,7 @@ public class Assembler {
         System.out.println("line[" + currentLine + "] ");
     }
 
-    private static String fillBits(String filler, String base, int length) {
+    public static String fillBits(String filler, String base, int length) {
         StringBuilder sb = new StringBuilder("");
 
         while (base.length() + sb.length() < length) {
@@ -365,6 +387,9 @@ public class Assembler {
             }
         }
         twos = builder.toString();
+
+        if (DEBUG)
+            System.out.println("Binary : " + bin + " ,TwosCompliment : " + twos);
         return twos;
     }
 
