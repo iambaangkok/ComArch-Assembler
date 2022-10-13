@@ -96,9 +96,9 @@ public class Assembler {
      * @return The binary machine codes.
      */
     public List<String> assembleIntoMachineCode() {
-        // Iterate once to fill labelMap
+        // Iterate through the file once to fill labelMap
         loadLine();
-        while (tok.hasNext()) {
+        while (tok.hasNext()) { // If there is still a token, the file isn't fully read yet
             if (lineData.isEmpty()) {
                 loadLine();
                 continue;
@@ -107,18 +107,21 @@ public class Assembler {
             if (DEBUG) {
                 System.out.println("Filling labelMap, lineData: " + lineData);
             }
-
+            
+            // Check if the line starts with a label or an instruction, or otherwise
             if (!isInstruction(lineData.get(0))) {
                 if (isValidLabel(lineData.get(0))) {
                     labelMap.put(lineData.get(0), currentLine);
                 } else {
-                    exit(1);
+                    exit(1, "A: First token of the line is not a label or an instruction.");
                 }
             }
+
+            // Prepare for next loop
             currentLine++;
             loadLine();
         }
-        //////////
+        
 
         if (DEBUG) {
             System.out.println(labelMap);
@@ -127,10 +130,9 @@ public class Assembler {
         tok.resetIterator();
         currentLine = 0;
 
-        // Iterate again to translate into machine code
+        // Iterate through the file again to compile each line into a machine code
         loadLine();
-
-        while (tok.hasNext()) {
+        while (tok.hasNext()) { // If there is still a token, the file isn't fully read yet
             int instIndex = 0;
             if (lineData.isEmpty()) {
                 loadLine();
@@ -138,114 +140,121 @@ public class Assembler {
             }
 
             if (DEBUG) {
-                System.out.println("Filling labelMap, lineData: " + lineData);
+                System.out.println("Compiling, lineData: " + lineData);
             }
 
+            // Check if the line starts with a label or an instruction, or otherwise
             if (!isInstruction(lineData.get(instIndex))) {
                 if (!isLabel(lineData.get(instIndex))) {
-                    if (DEBUG)
-                        System.out.println("A");
-                    exit(1);
+                    exit(1, "A: First token of the line is not a label or an instruction.");
                 } else {
                     instIndex++;
                     if (!isInstruction(lineData.get(instIndex))) {
-                        if (DEBUG)
-                            System.out.println("B");
-                        exit(1);
+                        exit(1, "B: Second token of the line is not an instruction.");
                     }
                 }
             }
+
+            // Prepare for compilation
             String inst = lineData.get(instIndex);
             String opcode = OPCODE_MAP.get(inst);
             String type = TYPE_MAP.get(inst);
+            
             int fieldCount = NUMERIC_FIELD_COUNT_MAP.get(inst);
             String[] fields = { "", "", "" };
 
+            // Sets the machine code to start with 0000000 since those bits should always be zero
             machineCode = MC_STARTER;
             machineCode += opcode;
 
-            // Convert numeric fields to number
+            // Convert numeric fields to number (numeric fields are fields that cannot be)
             for (int j = 0; j < fieldCount; ++j) {
                 fields[j] = lineData.get(instIndex + 1 + j);
-                if (!isInteger(fields[j])) {
-                    if (DEBUG)
-                        System.out.println("C");
-                    exit(1);
-                } else {
-                    fields[j] = toBinaryString(toInteger(fields[j]));
-                    fields[j] = fillBits("0", fields[j], 3);
-                }
+                // Check for anomaly
+                if (!isInteger(fields[j]))
+                    exit(1, "C1: fields[" + j + "] is not an integer.");
+                int fieldInteger = toInteger(fields[j]);
+                if (fieldInteger < 0 || fieldInteger > 7)
+                    exit(1, "C2: fields[" + j + "] is out of range[0,7].");
+                
+                // Convert
+                fields[j] = toBinaryString(fieldInteger);
+                fields[j] = fillBits("0", fields[j], 3);
             }
 
-            if (type.equals("R")) {
+            // Continue building the machine code string
+            if (type.equals("R")) { // R-TYPE: add, nand
                 machineCode += fields[0];
                 machineCode += fields[1];
                 machineCode += "0000000000000";
                 machineCode += fields[2];
-            } else if (type.equals("I")) {
-                // check offsetField in [-32768,32767] & turn into 16 bit 2's compliment
-                // fields[2]
-                // check for symbolic address
 
+            } else if (type.equals("I")) { // I-TYPE: lw, sw, beq
                 machineCode += fields[0];
                 machineCode += fields[1];
+
+                // Check if fields[2] is an integer or a symbolic address, or otherwise
                 fields[2] = lineData.get(instIndex + 3);
                 int offsetField = 0;
-                if (DEBUG)
-                    System.out.println("field[2] = " + fields[2]);
-                if (isInteger(fields[2])) {
+                if (DEBUG) System.out.println("field[2] = " + fields[2]);
+                
+                
+                if (isInteger(fields[2])) { // Case: fields[2] is an integer
+
                     offsetField = toInteger(fields[2]);
-                    if (DEBUG)
-                        System.out.println("field[2] isInteger = " + offsetField);
-                } else if (isLabel(fields[2])) {
+                    if (DEBUG) System.out.println("field[2] isInteger = " + offsetField);
+
+                } else if (isLabel(fields[2])) { // Case: fields[2] is a symbolic address
+                    
+                    // Calculate offsetField
+                    // Check if instruction is beq because beq has different offsetField calculation
                     if (inst.equals("beq")) {
-                        // Addr = PC+1+offsetField
-                        // offsetField = Addr-PC-1
+                        // Address = PC + 1 + offsetField
+                        // offsetField = Address - PC - 1
                         offsetField = labelMap.get(fields[2]) - currentLine - 1;
                     } else {
                         offsetField = labelMap.get(fields[2]);
                     }
-                    if (DEBUG)
-                        System.out.println("field[2] isLabel = " + offsetField);
+                    if (DEBUG) System.out.println("field[2] isLabel = " + offsetField);
+
                 } else {
-                    if (DEBUG)
-                        System.out.println("D");
-                    exit(1);
+                    exit(1, "D: Invalid fields[2] for I-Type instruction.");
                 }
 
-                if (offsetField > 32767 || offsetField < -32768) {
-                    if (DEBUG)
-                        System.out.println("E");
-                    exit(1);
+                // Check for anomaly
+                if (offsetField < -32768 || offsetField > 32767)
+                    exit(1, "E: beq offsetField out of range[-32768,32767]");
+                
+                // Convert offsetFields into binary string
+                String offsetFieldBin;
+                if (offsetField >= 0) {
+                    offsetFieldBin = toBinaryString(offsetField);
+                    offsetFieldBin = fillBits("0", offsetFieldBin, 16);
+
                 } else {
-                    String bin;
-                    if (offsetField >= 0) {
-                        bin = toBinaryString(offsetField);
-                        System.out.println("bin: " + bin);
-                        bin = fillBits("0", bin, 16);
-
-                    } else {
-                        offsetField = -offsetField;
-                        bin = toBinaryString(offsetField);
-                        bin = fillBits("0", bin, 16);
-                        bin = twosCompliment(bin);
-                    }
-
-                    machineCode += bin;
+                    offsetField = -offsetField;
+                    offsetFieldBin = toBinaryString(offsetField);
+                    offsetFieldBin = fillBits("0", offsetFieldBin, 16);
+                    offsetFieldBin = twosCompliment(offsetFieldBin);
                 }
-            } else if (type.equals("J")) {
+                machineCode += offsetFieldBin;
+
+            } else if (type.equals("J")) { // J-TYPE: jalr
                 machineCode += fields[0];
                 machineCode += fields[1];
                 machineCode += "0000000000000000";
 
-            } else if (type.equals("O")) {
+            } else if (type.equals("O")) { // O-TYPE: halt, noop
                 machineCode += "0000000000000000000000";
 
-            } else if (inst.equals(".fill")) {
+            } else if (inst.equals(".fill")) { // .fill
                 machineCode = "";
-                String field = lineData.get(instIndex + 1);
-                System.out.println("instIndex: " + instIndex + " field: " + field);
-                if (isInteger(field)) {
+                String field = lineData.get(instIndex + 1); // .fill only one field
+                if(DEBUG) System.out.println("instIndex: " + instIndex + " field: " + field);
+
+                // Check if the field is an integer or a symbolic address, or otherwise
+                if (isInteger(field)) { // Case: field is an integer
+
                     int dec = toInteger(field);
                     String bin;
                     if (dec < 0) {
@@ -255,24 +264,23 @@ public class Assembler {
                         machineCode = twosCompliment(bin);
                     } else {
                         bin = toBinaryString(dec);
-                        machineCode = bin;
-                        machineCode = fillBits("0", machineCode, 32);
+                        machineCode = fillBits("0", bin, 32);
                     }
-                } else if (isLabel(field)) {
+
+                } else if (isLabel(field)) { // Case: field is a symbolic address
+
                     int dec = labelMap.get(field);
                     String bin = toBinaryString(dec);
                     machineCode = bin;
                     machineCode = fillBits("0", machineCode, 32);
+
                 } else {
-                    if (DEBUG)
-                        System.out.println("F");
-                    exit(1);
+                    exit(1, "F: Invalid field for .fill instruction.");
                 }
             }
-            if (DEBUG)
-                System.out.println("machineCode: " + machineCode);
+            if (DEBUG) System.out.println("machineCode: " + machineCode);
+            
             machineCodes.add(machineCode);
-
             currentLine++;
             loadLine();
         }
@@ -299,8 +307,7 @@ public class Assembler {
      * @return The binary string.
      */
     public static String toBinaryString(int dec) {
-        if (DEBUG)
-            System.out.print("toBinaryString(" + dec + "): ");
+        if (DEBUG) System.out.print("toBinaryString(" + dec + "): ");
 
         StringBuilder bin = new StringBuilder("");
 
@@ -316,8 +323,7 @@ public class Assembler {
 
         bin.reverse();
 
-        if (DEBUG)
-            System.out.println(bin);
+        if (DEBUG) System.out.println(bin);
 
         return bin.toString();
     }
@@ -328,8 +334,7 @@ public class Assembler {
      * @return The decimal integer.
      */
     public static int toDecimal(String bin) {
-        if (DEBUG)
-            System.out.print("toDecimal(" + bin + "): ");
+        if (DEBUG) System.out.print("toDecimal(" + bin + "): ");
 
         int dec = 0;
         int power = 0;
@@ -348,12 +353,18 @@ public class Assembler {
             dec = -dec;
         }
 
-        if (DEBUG)
-            System.out.println(dec);
+        if (DEBUG) System.out.println(dec);
 
         return dec;
     }
 
+    /**
+     * Fill the {@code base} binary string with {@code filler} until its length is {@code length}.
+     * @param filler The character that will be used to fill.
+     * @param base The base binary string.
+     * @param length The length of the resulting binary string.
+     * @return A binary string of length {@code length}.
+     */
     public static String fillBits(String filler, String base, int length) {
         StringBuilder sb = new StringBuilder("");
 
@@ -365,6 +376,11 @@ public class Assembler {
         return sb.toString();
     }
 
+    /**
+     * Perform 2's compliment on the binary string.
+     * @param bin The binary string to be converted.
+     * @return The binary string in 2's compliment form.
+     */
     public static String twosCompliment(String bin) {
         String twos = "", ones = "";
 
@@ -383,17 +399,18 @@ public class Assembler {
         }
         twos = builder.toString();
 
-        if (DEBUG)
-            System.out.println("Binary : " + bin + " ,TwosCompliment : " + twos);
+        if (DEBUG) System.out.println("twosCompliment(" + bin + "): " + twos);
         return twos;
     }
-
+    
+    /**
+     * Flips a character from 0 to 1
+     */
     public static char flip(char c) {
         if (c == '0') {
             return '1';
-        } else {
-            return '0';
         }
+        return '0';
     }
 
     //////////
