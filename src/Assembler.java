@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class Assembler {
-
+    
     private static boolean DEBUG = true;
 
     private static final Map<String, String> TYPE_MAP = Map.of(
@@ -42,6 +42,8 @@ public class Assembler {
 
     private static final Pattern NUMERIC_PATTERN = Pattern.compile("-?\\d+(\\.\\d+)?");
 
+    //////////
+
     private Tokenizer tok;
 
     private Map<String, Integer> labelMap = new HashMap<>();
@@ -55,6 +57,13 @@ public class Assembler {
         tok = new Tokenizer(assembly);
     }
 
+    //////////
+    ////////// Main methods
+    //////////
+
+    /**
+     * Loads a line of assembly instruction into {@code lineData} for compilation.
+     */
     private void loadLine() {
         lineData = new ArrayList<>();
 
@@ -69,93 +78,23 @@ public class Assembler {
         }
     }
 
-    public static boolean isInteger(String token) {
-        if(NUMERIC_PATTERN.matcher(token).matches()){
-            double number = Double.parseDouble(token);
-            if(number % 1 != 0){
-                return false;
-            }else{
-                return true;
-            }
-        }else{
-            return false;
-        }
-    }
-
-    public static int toNumeric(String token) {
-        return Integer.parseInt(token);
-    }
-
-    public static String toBinaryString(int dec) {
-        if (DEBUG)
-            System.out.print("toBinaryString(" + dec + "): ");
-
-        StringBuilder bin = new StringBuilder("");
-
-        if (dec == 0 || dec == 1) {
-            bin.append(dec);
-            return bin.toString();
+    /**
+     * Converts the binary machine codes into decimal format.
+     * @return The decimal machine codes.
+     */
+    public List<String> getDecimalMachineCodes() {
+        List<String> dmc = new ArrayList<>();
+        for (String mc : machineCodes) {
+            dmc.add(toDecimal(mc) + "");
         }
 
-        while (dec > 0) {
-            bin.append(dec % 2);
-            dec /= 2;
-        }
-
-        bin.reverse();
-
-        if (DEBUG)
-            System.out.println(bin);
-
-        return bin.toString();
+        return dmc;
     }
 
-    public static int toDecimal(String bin) {
-        if (DEBUG)
-            System.out.print("toDecimal(" + bin + "): ");
-
-        int dec = 0;
-        int power = 0;
-
-        if (bin.charAt(0) == '0') {
-            for (int i = bin.length() - 1; i >= 0; i--) {
-                dec += toNumeric(bin.charAt(i) + "") * Math.pow(2, power);
-                power++;
-            }
-        } else {
-            bin = twosCompliment(bin);
-            for (int i = bin.length() - 1; i >= 0; i--) {
-                dec += toNumeric(bin.charAt(i) + "") * Math.pow(2, power);
-                power++;
-            }
-            dec = -dec;
-        }
-
-        if (DEBUG)
-            System.out.println(dec);
-
-        return dec;
-    }
-
-    private static boolean isLineBreak(String token) {
-        return token.equals("\n");
-    }
-
-    private static boolean isInstruction(String token) {
-        return TYPE_MAP.containsKey(token);
-    }
-
-    private boolean isLabel(String token) {
-        System.out.println("isLabel: " + token + " " + labelMap.containsKey(token));
-        return labelMap.containsKey(token);
-    }
-
-    private boolean isValidLabel(String token) {
-        return !(token.length() > 6
-                || labelMap.containsKey(token)
-                || isInteger(token.charAt(0) + ""));
-    }
-
+    /**
+     * Compile the assembly into binary machine codes.
+     * @return The binary machine codes.
+     */
     public List<String> assembleIntoMachineCode() {
         // Iterate once to fill labelMap
         loadLine();
@@ -233,7 +172,7 @@ public class Assembler {
                         System.out.println("C");
                     exit(1);
                 } else {
-                    fields[j] = toBinaryString(toNumeric(fields[j]));
+                    fields[j] = toBinaryString(toInteger(fields[j]));
                     fields[j] = fillBits("0", fields[j], 3);
                 }
             }
@@ -255,7 +194,7 @@ public class Assembler {
                 if (DEBUG)
                     System.out.println("field[2] = " + fields[2]);
                 if (isInteger(fields[2])) {
-                    offsetField = toNumeric(fields[2]);
+                    offsetField = toInteger(fields[2]);
                     if (DEBUG)
                         System.out.println("field[2] isInteger = " + offsetField);
                 } else if (isLabel(fields[2])) {
@@ -307,7 +246,7 @@ public class Assembler {
                 String field = lineData.get(instIndex + 1);
                 System.out.println("instIndex: " + instIndex + " field: " + field);
                 if (isInteger(field)) {
-                    int dec = toNumeric(field);
+                    int dec = toInteger(field);
                     String bin;
                     if (dec < 0) {
                         dec = -dec;
@@ -341,22 +280,78 @@ public class Assembler {
         return new ArrayList<String>(machineCodes);
     }
 
-    public List<String> getDecimalMachineCodes() {
-        List<String> dmc = new ArrayList<>();
-        for (String mc : machineCodes) {
-            dmc.add(toDecimal(mc) + "");
+    //////////
+    ////////// Binary/Decimal/Conversion methods
+    //////////
+
+    /**
+     * Converts a {@code token} into an integer.
+     * @param token The token to be converted.
+     * @return The integer.
+     */
+    public static int toInteger(String token) {
+        return Integer.parseInt(token);
+    }
+
+    /**
+     * Converts a decimal integer into a binary string.
+     * @param dec The decimal integer.
+     * @return The binary string.
+     */
+    public static String toBinaryString(int dec) {
+        if (DEBUG)
+            System.out.print("toBinaryString(" + dec + "): ");
+
+        StringBuilder bin = new StringBuilder("");
+
+        if (dec == 0 || dec == 1) {
+            bin.append(dec);
+            return bin.toString();
         }
 
-        return dmc;
+        while (dec > 0) {
+            bin.append(dec % 2);
+            dec /= 2;
+        }
+
+        bin.reverse();
+
+        if (DEBUG)
+            System.out.println(bin);
+
+        return bin.toString();
     }
 
-    public void exit(int exitCode) {
-        System.out.println("Exited with status " + exitCode);
-        System.exit(exitCode);
-    }
+    /**
+     * Converts a binary string into a decimal integer.
+     * @param bin The binary string.
+     * @return The decimal integer.
+     */
+    public static int toDecimal(String bin) {
+        if (DEBUG)
+            System.out.print("toDecimal(" + bin + "): ");
 
-    public void printAssemblyWithCurrentLine() {
-        System.out.println("line[" + currentLine + "] ");
+        int dec = 0;
+        int power = 0;
+
+        if (bin.charAt(0) == '0') {
+            for (int i = bin.length() - 1; i >= 0; i--) {
+                dec += toInteger(bin.charAt(i) + "") * Math.pow(2, power);
+                power++;
+            }
+        } else {
+            bin = twosCompliment(bin);
+            for (int i = bin.length() - 1; i >= 0; i--) {
+                dec += toInteger(bin.charAt(i) + "") * Math.pow(2, power);
+                power++;
+            }
+            dec = -dec;
+        }
+
+        if (DEBUG)
+            System.out.println(dec);
+
+        return dec;
     }
 
     public static String fillBits(String filler, String base, int length) {
@@ -400,4 +395,93 @@ public class Assembler {
             return '0';
         }
     }
+
+    //////////
+    ////////// Checking methods
+    //////////
+
+    /**
+     * Checks whether the {@code token} is an integer.
+     * @param token The token to be checked.
+     * @return {@code True} if {@code token} is an integer.
+     */
+    public static boolean isInteger(String token) {
+        if(NUMERIC_PATTERN.matcher(token).matches()){
+            double number = Double.parseDouble(token);
+            if(number % 1 != 0){
+                return false;
+            }else{
+                return true;
+            }
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether the {@code token} is a line break character.
+     * @param token The token to be checked.
+     * @return {@code True} if {@code token} is a line break character.
+     */
+    private static boolean isLineBreak(String token) {
+        return token.equals("\n");
+    }
+
+    /**
+     * Checks whether the {@code token} is an instruction or a .fill.
+     * @param token The token to be checked.
+     * @return {@code True} if {@code token} is an instruction or a .fill.
+     */
+    private static boolean isInstruction(String token) {
+        return TYPE_MAP.containsKey(token);
+    }
+
+    /**
+     * Checks whether the {@code token} is a label.
+     * @param token The token to be checked.
+     * @return {@code True} if {@code token} is a label.
+     */
+    private boolean isLabel(String token) {
+        System.out.println("isLabel: " + token + " " + labelMap.containsKey(token));
+        return labelMap.containsKey(token);
+    }
+
+    /**
+     * Checks whether the {@code token} is passes the constraints of being a label.
+     * Used in adding new label to the {@code labelMap}.
+     * @param token The token to be checked.
+     * @return {@code True} if {@code token} is a label.
+     */
+    private boolean isValidLabel(String token) {
+        return !(token.length() > 6
+                || labelMap.containsKey(token)
+                || isInteger(token.charAt(0) + ""));
+    }
+
+
+    //////////
+    ////////// System methods
+    //////////
+
+    /**
+     * Call System.exit() with {@code exitCode} and announce the exit.
+     * @param exitCode The exit code.
+     */
+    public void exit(int exitCode) {
+        System.out.println("Exited with status " + exitCode);
+        System.exit(exitCode);
+    }
+
+    /**
+     * Call System.exit() with {@code exitCode} and announce the exit with {@code message}.
+     * @param exitCode The exit code.
+     * @param message The exit message.
+     */
+    public void exit(int exitCode, String message) {
+        System.out.println("Exited with status " + exitCode);
+        System.out.println("Exit message: " + message);
+        System.exit(exitCode);
+    }
+
+    
 }
