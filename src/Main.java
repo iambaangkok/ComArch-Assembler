@@ -7,9 +7,9 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         
-        compile("_multiplication");
+        // compile("_multiplication");
         compile("_combination");
-        compile("test",1,1);
+        // compile("test",1,1);
 
     }
 
@@ -18,7 +18,7 @@ public class Main {
      * @param fileName the name of the assembly file to be compiled
      */
     public static void compile(String fileName){
-        Assembler as = new Assembler(FileReaderWriter.readFileToString(SRC_DIR+fileName+SRC_EXT));
+        Assembler as = new Assembler(FileReaderWriter.readFileToString(SRC_DIR + fileName + SRC_EXT));
 
         List<String> machineCodes = as.assembleIntoMachineCode();
         List<String> decimalMachineCodes = as.getDecimalMachineCodes();
