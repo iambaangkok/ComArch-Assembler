@@ -2,12 +2,8 @@
         lw  0   2   r
         lw  0   5   stack
         lw  0   7   rad
-        beq 0   0   combi2
-combi   lw  0   6   pos1
-        add 0   6   3
-        jalr    7   6
-combi2   beq 1   2   combi
-        beq 2   0   combi
+combi   beq 1   2   combi2
+        beq 2   0   combi2
         lw  0   6   neg1
         add 1   6   1
         lw  0   6   pos1
@@ -44,6 +40,9 @@ combi2   beq 1   2   combi
         lw  5   7   stack
         jalr 7  6
 end halt
+combi2  lw  0   6   pos1
+        add 0   6   3
+        jalr    7   6
 n       .fill   7
 r       .fill   3
 pos1    .fill    1
