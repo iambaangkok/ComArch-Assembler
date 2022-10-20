@@ -24,7 +24,7 @@ public class Main {
         List<String> decimalMachineCodes = as.getDecimalMachineCodes();
 
         FileReaderWriter.writeStringToFile(OUTPUT_DIR + fileName+".bin", machineCodes);
-        FileReaderWriter.writeStringToFile(OUTPUT_DIR + fileName+".o", decimalMachineCodes);
+        FileReaderWriter.writeStringToFile(OUTPUT_DIR + fileName+".txt", decimalMachineCodes);
     }
     /**
      * Compiles a series of continuous files
