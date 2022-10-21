@@ -50,7 +50,7 @@ combi2  lw  0   5   pos1
 
 end halt
 
-n       .fill   6
+n       .fill   7
 r       .fill   3
 rAddr     .fill   end
 comAdr     .fill   combi
