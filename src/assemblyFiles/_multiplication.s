@@ -14,8 +14,8 @@ loop2   add     1       1       1
         beq     0       0       loop1
         noop
 end     halt
-mcand   .fill   32766
-mplier  .fill   10383
+mcand   .fill   105
+mplier  .fill   32
 pos1    .fill   1
 neg1    .fill   -1
 exit    .fill   15
