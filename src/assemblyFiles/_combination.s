@@ -39,10 +39,11 @@ combi   beq 1   2   combi2
         add 5   6   5
         lw  5   7   stack
         jalr 7  6
-end halt
+        beq 0   0   end
 combi2  lw  0   6   pos1
         add 0   6   3
         jalr    7   6
+end halt
 n       .fill   7
 r       .fill   3
 pos1    .fill    1

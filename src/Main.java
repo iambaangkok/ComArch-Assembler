@@ -9,7 +9,7 @@ public class Main {
         
         compile("_multiplication");
         compile("_combination");
-        compile("test",1,1);
+        compile("test",1,2);
 
     }
 
