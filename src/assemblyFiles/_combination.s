@@ -37,17 +37,20 @@ combi   beq 1   2   combi2
         add 7   5   7
         lw  7   4   stack
         add 3   4   3
-        add 5   6   5
-        add 5   6   5
-        add 5   6   5
-        lw  5   7   stack
-        jalr 7  6
+        add 7   5   7
+        add 7   5   7
+        add 7   5   7
+        lw  7   6   stack
+        jalr 6  5
         beq 0   0   end
-combi2  lw  0   6   pos1
-        add 0   6   3
-        jalr    7   6
+
+combi2  lw  0   5   pos1
+        add 0   5   3
+        jalr    6   5
+
 end halt
-n       .fill   7
+
+n       .fill   6
 r       .fill   3
 rAddr     .fill   end
 comAdr     .fill   combi
