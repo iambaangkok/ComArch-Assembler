@@ -18,8 +18,8 @@ for     lw    0   3   output
         nand  2   2   2
         nand  1   2   3
 end     halt
-input1  .fill   1
-input2  .fill   0
+input1  .fill   130
+input2  .fill   400
 alu     .fill   2
 f_or    .fill   1
 f_add   .fill   2

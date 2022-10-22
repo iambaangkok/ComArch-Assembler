@@ -7,10 +7,10 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         
-        compile("_multiplication");
+        // compile("_multiplication");
         compile("_combination");
-        compile("_alu");
-        compile("test",1,2);
+        // compile("_alu");
+        // compile("test",1,2);
 
     }
 
